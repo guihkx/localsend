@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:localsend_app/gen/assets.gen.dart';
 import 'package:localsend_app/gen/strings.g.dart';
@@ -25,7 +27,14 @@ Future<void> initTray() async {
     } else if (checkPlatform([TargetPlatform.macOS])) {
       await tm.trayManager.setIcon(Assets.img.logo32Black.path, isTemplate: true);
     } else if (checkPlatform([TargetPlatform.linux])) {
-      await tm.trayManager.setIcon(Assets.img.logo32White.path);
+      String icon;
+      if (Platform.environment.containsKey('FLATPAK_ID') || Platform.environment.containsKey('SNAP_NAME')) {
+        icon = 'org.localsend.localsend_app-tray';
+      } else {
+        icon = Assets.img.logo32White.path;
+      }
+      _logger.info('Using "$icon" as path of system tray icon');
+      await tm.trayManager.setIcon(icon);
     } else {
       await tm.trayManager.setIcon(Assets.img.logo32.path);
     }
